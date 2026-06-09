@@ -113,11 +113,21 @@ def video_embed(url):
     if "youtube.com" in host:
         video_id = parse_qs(parsed.query).get("v", [""])[0]
         if video_id:
-            return youtube_card(video_id, clean_url)
+            return video_iframe(
+                f"https://www.youtube-nocookie.com/embed/{html.escape(video_id)}",
+                "Embedded YouTube video",
+                clean_url,
+                "Watch on YouTube",
+            )
     if "youtu.be" in host:
         video_id = parsed.path.strip("/").split("/")[0]
         if video_id:
-            return youtube_card(video_id, clean_url)
+            return video_iframe(
+                f"https://www.youtube-nocookie.com/embed/{html.escape(video_id)}",
+                "Embedded YouTube video",
+                clean_url,
+                "Watch on YouTube",
+            )
     if "vimeo.com" in host:
         match = re.search(r"/(\d+)", parsed.path)
         if match:
@@ -139,16 +149,6 @@ def video_iframe(src, title, fallback_url, fallback_text):
         'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" '
         "allowfullscreen></iframe></div>"
         f'<p class="video-fallback"><a href="{fallback}">{html.escape(fallback_text)}</a></p>'
-    )
-
-
-def youtube_card(video_id, url):
-    escaped_url = html.escape(url)
-    return (
-        f'<a class="youtube-card" href="{escaped_url}">'
-        '<span class="youtube-mark">YouTube</span>'
-        '<span class="youtube-play">Watch on YouTube</span>'
-        "</a>"
     )
 
 
@@ -231,7 +231,12 @@ def write_page(slug, content):
 
 
 def build_home(pages):
-    home_image = "assets/home-cat-moon.png" if (ROOT / "assets" / "home-cat-moon.png").exists() else "2024/04/star-edited.jpg"
+    if (ROOT / "assets" / "home-cat-moon.jpg").exists():
+        home_image = "assets/home-cat-moon.jpg"
+    elif (ROOT / "assets" / "home-cat-moon.png").exists():
+        home_image = "assets/home-cat-moon.png"
+    else:
+        home_image = "2024/04/star-edited.jpg"
     body = """<section class="home-clean">
   <div class="home-image">
     <img src="{home_image}" alt="Night sea illustration with a white cat under the moon">

@@ -454,37 +454,6 @@ h1 {
   color: var(--muted);
 }
 
-.youtube-card {
-  background: #111;
-  display: grid;
-  margin: 18px 0 24px;
-  max-width: 900px;
-  overflow: hidden;
-  position: relative;
-  text-decoration: none;
-  min-height: 220px;
-  place-items: center;
-}
-
-.youtube-mark {
-  color: rgb(255 255 255 / 0.42);
-  font-size: clamp(34px, 7vw, 84px);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1;
-}
-
-.youtube-play {
-  align-self: center;
-  border: 1px solid rgb(255 255 255 / 0.78);
-  color: white;
-  font-size: 16px;
-  grid-area: 1 / 1;
-  justify-self: center;
-  padding: 12px 18px;
-  position: relative;
-}
-
 .project-photo-grid {
   display: grid;
   gap: 16px;
