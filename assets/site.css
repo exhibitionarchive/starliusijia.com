@@ -573,6 +573,14 @@ h1 {
     grid-template-columns: 1fr;
   }
 
+  .page-about .wp-block-columns {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-about .wp-block-column {
+    grid-column: 1;
+  }
+
   .project-photo-grid {
     grid-template-columns: 1fr;
   }
