@@ -115,14 +115,14 @@ def excerpt(markup, limit=170):
 
 def video_embed(url):
     clean_url = html.unescape(url)
-    if clean_url == "https://youtu.be/qMnxyR7JGao":
-        clean_url = "https://www.youtube.com/watch?v=qMnxyR7JGao"
+    if clean_url in {"https://youtu.be/qMnxyR7JGao", "https://www.youtube.com/watch?v=qMnxyR7JGao"}:
+        clean_url = "https://www.youtube.com/watch?v=u5XRQvSbn2s"
     parsed = urlparse(clean_url)
     host = parsed.netloc.lower()
     if "youtube.com" in host:
         video_id = parse_qs(parsed.query).get("v", [""])[0]
         if video_id:
-            embed_host = "www.youtube.com" if video_id == "qMnxyR7JGao" else "www.youtube-nocookie.com"
+            embed_host = "www.youtube.com" if video_id == "u5XRQvSbn2s" else "www.youtube-nocookie.com"
             return video_iframe(
                 f"https://{embed_host}/embed/{html.escape(video_id)}",
                 "Embedded YouTube video",
@@ -132,7 +132,7 @@ def video_embed(url):
     if "youtu.be" in host:
         video_id = parsed.path.strip("/").split("/")[0]
         if video_id:
-            embed_host = "www.youtube.com" if video_id == "qMnxyR7JGao" else "www.youtube-nocookie.com"
+            embed_host = "www.youtube.com" if video_id == "u5XRQvSbn2s" else "www.youtube-nocookie.com"
             return video_iframe(
                 f"https://{embed_host}/embed/{html.escape(video_id)}",
                 "Embedded YouTube video",
@@ -313,10 +313,10 @@ def build_standard_page(page):
             '<figure><img src="../assets/time-enough-installation-2.png" alt="TIME ENOUGH exhibition view with two video screens and installation objects"></figure>'
             "</div>"
         )
-        content = content.replace('</p><div class="project-photo-grid is-large">', '</p>', 1)
+        content = content.replace(images, "")
         content = re.sub(
-            r'(<p class="video-fallback">[\s\S]*?</p>)',
-            lambda match: match.group(1) + images,
+            r'(<p class="video-fallback">[\s\S]*?</p>)(\s*</div>\s*</div>\s*</div>)',
+            lambda match: match.group(1) + match.group(2) + images,
             content,
             count=1,
         )
