@@ -108,6 +108,8 @@ def excerpt(markup, limit=170):
 
 def video_embed(url):
     clean_url = html.unescape(url)
+    if clean_url == "https://youtu.be/qMnxyR7JGao":
+        clean_url = "https://www.youtube.com/watch?v=qMnxyR7JGao"
     parsed = urlparse(clean_url)
     host = parsed.netloc.lower()
     if "youtube.com" in host:
