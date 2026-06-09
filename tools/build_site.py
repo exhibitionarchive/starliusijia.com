@@ -95,6 +95,7 @@ def clean_content(markup, prefix=""):
         lambda match: video_embed(match.group(1)),
         markup,
     )
+    markup = shorten_link_text(markup)
     markup = re.sub(r"<div class=\"wp-block-group alignfull\"[^>]*>\s*</div>", "", markup)
     return markup.strip()
 
@@ -132,6 +133,26 @@ def video_iframe(src, title):
         'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" '
         "allowfullscreen></iframe></div>"
     )
+
+
+def shorten_link_text(markup):
+    def replace(match):
+        href = match.group(1)
+        label = html.unescape(match.group(2)).strip()
+        if not re.match(r"https?://", label):
+            return match.group(0)
+        parsed = urlparse(label)
+        if "transculturalcollaboration.com" in parsed.netloc:
+            text = "Transcultural Collaboration project page"
+        elif "landhuman.wordpress.com" in parsed.netloc:
+            text = "Project website"
+        elif "wordpress.com" in parsed.netloc:
+            text = "Exhibition website"
+        else:
+            text = parsed.netloc.replace("www.", "") or "Open link"
+        return f'<a href="{href}">{html.escape(text)}</a>'
+
+    return re.sub(r'<a href="([^"]+)">(https?://[^<]+)</a>', replace, markup)
 
 
 def first_image(markup):
