@@ -115,29 +115,39 @@ def excerpt(markup, limit=170):
 
 def video_embed(url):
     clean_url = html.unescape(url)
+    start_at = None
     if clean_url in {"https://youtu.be/qMnxyR7JGao", "https://www.youtube.com/watch?v=qMnxyR7JGao"}:
-        clean_url = "https://www.youtube.com/watch?v=u5XRQvSbn2s"
+        clean_url = "https://www.youtube.com/watch?v=qMnxyR7JGao"
+        start_at = "3"
     parsed = urlparse(clean_url)
     host = parsed.netloc.lower()
     if "youtube.com" in host:
         video_id = parse_qs(parsed.query).get("v", [""])[0]
         if video_id:
-            embed_host = "www.youtube.com" if video_id == "u5XRQvSbn2s" else "www.youtube-nocookie.com"
+            embed_host = "www.youtube.com" if video_id == "qMnxyR7JGao" else "www.youtube-nocookie.com"
+            src = f"https://{embed_host}/embed/{html.escape(video_id)}"
+            if start_at:
+                src += f"?start={html.escape(start_at)}"
             return video_iframe(
-                f"https://{embed_host}/embed/{html.escape(video_id)}",
+                src,
                 "Embedded YouTube video",
                 clean_url,
                 "Watch on YouTube",
+                "video-container" if start_at else "video-embed",
             )
     if "youtu.be" in host:
         video_id = parsed.path.strip("/").split("/")[0]
         if video_id:
-            embed_host = "www.youtube.com" if video_id == "u5XRQvSbn2s" else "www.youtube-nocookie.com"
+            embed_host = "www.youtube.com" if video_id == "qMnxyR7JGao" else "www.youtube-nocookie.com"
+            src = f"https://{embed_host}/embed/{html.escape(video_id)}"
+            if start_at:
+                src += f"?start={html.escape(start_at)}"
             return video_iframe(
-                f"https://{embed_host}/embed/{html.escape(video_id)}",
+                src,
                 "Embedded YouTube video",
                 clean_url,
                 "Watch on YouTube",
+                "video-container" if start_at else "video-embed",
             )
     if "vimeo.com" in host:
         match = re.search(r"/(\d+)", parsed.path)
@@ -152,10 +162,10 @@ def video_embed(url):
     return f'<p class="media-link"><a href="{escaped}">{escaped}</a></p>'
 
 
-def video_iframe(src, title, fallback_url, fallback_text):
+def video_iframe(src, title, fallback_url, fallback_text, wrapper_class="video-embed"):
     fallback = html.escape(fallback_url)
     return (
-        '<div class="video-embed">'
+        f'<div class="{html.escape(wrapper_class)}">'
         f'<iframe src="{src}" title="{title}" loading="lazy" '
         'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" '
         "allowfullscreen></iframe></div>"
@@ -304,6 +314,10 @@ def build_standard_page(page):
     title = DISPLAY_TITLES.get(page["slug"], page["title"].replace("\xa0", " ").strip())
     content = re.sub(r"To Summer Offline Shop Projects", "To Summer Commercial Project", content)
     content = normalize_dates(content)
+    if page["slug"] == "publication":
+        content = separate_publication_entries(content)
+    if page["slug"] == "dreamscaping":
+        content = add_dreamscaping_related_publication(content)
     if page["slug"] in VENUE_DETAILS:
         content = add_venue_detail(content, VENUE_DETAILS[page["slug"]])
     if page["slug"] == "time-enough":
@@ -320,7 +334,7 @@ def build_standard_page(page):
             content,
             count=1,
         )
-    if page["slug"] in {"dreamscaping", "future-tense"}:
+    if page["slug"] in {"dreamscaping", "dreamscapes"}:
         content = move_video_under_first_image(content)
     content = re.sub(
         rf'^\s*<div class="wp-block-group[^"]*">\s*<div class="wp-block-columns[^"]*">\s*<div class="wp-block-column[^"]*">\s*<h2 class="wp-block-heading">{re.escape(title)}</h2>',
@@ -345,6 +359,35 @@ def normalize_dates(content):
     return content
 
 
+def separate_publication_entries(content):
+    content = content.replace(
+        '</div>\n\n\n\n<div class="wp-block-group">\n<div class="wp-block-group">\n<p class="has-small-font-size"><strong><a href="https://isea-archives.siggraph.org/wp-content/uploads/2025/01/2024_Liu_Falling_Echoes_Expressing_the_Act_of_Falling.pdf">Falling Echoes',
+        '</div>\n</div>\n\n\n\n<div class="wp-block-group">\n<div class="wp-block-group">\n<p class="has-small-font-size"><strong><a href="https://isea-archives.siggraph.org/wp-content/uploads/2025/01/2024_Liu_Falling_Echoes_Expressing_the_Act_of_Falling.pdf">Falling Echoes',
+        1,
+    )
+    return content.replace(
+        '</div>\n</div>\n</div>\n\n\n\n<div class="wp-block-group">\n<div class="wp-block-group">\n<p class="has-small-font-size"><strong><a href="https://doi.org/10.1145/3613905.3644054">Virtual Dream Reliving',
+        '</div>\n</div>\n\n\n\n<div class="wp-block-group">\n<div class="wp-block-group">\n<p class="has-small-font-size"><strong><a href="https://doi.org/10.1145/3613905.3644054">Virtual Dream Reliving',
+        1,
+    )
+
+
+def add_dreamscaping_related_publication(content):
+    if "10.1145/3803784.3807563" in content:
+        return content
+    related = (
+        '<p class="has-small-font-size"><strong>Related Publication:</strong> '
+        '<a href="https://doi.org/10.1145/3803784.3807563">"Illustration of the subconscious mind": '
+        'Reinterpreting Dream Material as Artistic Creative Workflows Supported by Generative AI</a></p>'
+    )
+    return re.sub(
+        r'(<p class="has-small-font-size"><strong>Exhibition Website:</strong>[\s\S]*?</p>)',
+        lambda match: match.group(1) + "\n\n\n\n" + related,
+        content,
+        count=1,
+    )
+
+
 def add_venue_detail(content, venue):
     pattern = r'(<p class="has-small-font-size"><strong>[^<]+</strong>(?:, <strong>[^<]+</strong>)?</p>)'
     if venue in content:
@@ -356,7 +399,7 @@ def add_venue_detail(content, venue):
 def move_video_under_first_image(content):
     video_match = re.search(r'<div class="video-embed">[\s\S]*?<p class="video-fallback">[\s\S]*?</p>', content)
     image_match = re.search(r'(<figure class="wp-block-image[^>]*><img [\s\S]*?</figure>)', content)
-    if not video_match or not image_match or video_match.start() > image_match.end():
+    if not video_match or not image_match:
         return content
     video = video_match.group(0)
     content = content[: video_match.start()] + content[video_match.end() :]

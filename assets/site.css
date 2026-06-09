@@ -275,17 +275,21 @@ h1 {
 
 .page-publication .wp-content > .wp-block-group {
   border-bottom: 1px solid var(--line);
-  padding: 18px 0;
+  padding: 24px 0;
 }
 
 .page-publication .wp-content > .wp-block-group p {
-  margin: 0;
+  margin: 0 0 7px;
 }
 
 .page-publication .wp-content > .wp-block-group p:first-child {
   font-size: 18px;
   line-height: 1.35;
   max-width: 960px;
+}
+
+.page-publication .wp-content > .wp-block-group + .wp-block-group {
+  margin-top: 6px;
 }
 
 .artwork-page {
@@ -426,13 +430,21 @@ h1 {
 }
 
 .page-dreamscaping .video-embed,
+.page-dreamscapes .video-embed {
+  max-width: 520px;
+}
+
+.page-dreamscaping .video-fallback,
+.page-dreamscapes .video-fallback {
+  max-width: 520px;
+}
+
 .page-future-tense .video-embed {
   margin-left: auto;
   margin-right: auto;
   max-width: 760px;
 }
 
-.page-dreamscaping .video-fallback,
 .page-future-tense .video-fallback {
   margin-left: auto;
   margin-right: auto;
@@ -454,9 +466,28 @@ h1 {
   overflow: hidden;
 }
 
+.video-container {
+  background: #111;
+  height: 0;
+  margin: 18px 0;
+  max-width: 100%;
+  overflow: hidden;
+  padding-bottom: 56.25%;
+  position: relative;
+}
+
 .video-embed iframe {
   border: 0;
   height: 100%;
+  width: 100%;
+}
+
+.video-container iframe {
+  border: 0;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
   width: 100%;
 }
 
