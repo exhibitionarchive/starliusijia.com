@@ -40,6 +40,18 @@ PROJECTS = [
     "fortune-telling",
     "look-deep-into-your-dream",
 ]
+DISPLAY_TITLES = {
+    "to-summer": "To Summer Commercial Project",
+}
+CARD_COVERS = {
+    "time-enough": None,
+    "look-deep-into-your-dream": "2024/04/2-7.jpg",
+}
+POSTER_CARDS = {
+    "speculative-visions-of-a-post-climate-future",
+    "dreamscapes",
+    "future-tense",
+}
 
 
 def text(node, query, default=""):
@@ -77,6 +89,11 @@ def clean_content(markup, prefix=""):
         markup = re.sub(r'((?:src|href)=")(20\d{2}/)', rf"\1{prefix}\2", markup)
     markup = re.sub(r"\s(?:width|height|sizes|srcset)=\"[^\"]*\"", "", markup)
     markup = re.sub(r"\sstyle=\"[^\"]*\"", "", markup)
+    markup = re.sub(
+        r"<figure class=\"wp-block-embed[\s\S]*?<div class=\"wp-block-embed__wrapper\">\s*(https?://[^\s<]+)\s*</div></figure>",
+        r'<p class="media-link"><a href="\1">\1</a></p>',
+        markup,
+    )
     markup = re.sub(r"<div class=\"wp-block-group alignfull\"[^>]*>\s*</div>", "", markup)
     return markup.strip()
 
@@ -146,15 +163,16 @@ def write_page(slug, content):
 
 
 def build_home(pages):
+    home_image = "assets/home-cat-moon.png" if (ROOT / "assets" / "home-cat-moon.png").exists() else "2024/04/star-edited.jpg"
     body = """<section class="home-clean">
   <div class="home-image">
-    <img src="2024/04/star-edited.jpg" alt="Portrait illustration of Liu Sijia Star">
+    <img src="{home_image}" alt="Night sea illustration with a white cat under the moon">
   </div>
   <div class="home-name">
     <h1><span>LIU</span><span>Sijia Star</span></h1>
     <p>Art, Design, Curation, Research</p>
   </div>
-</section>"""
+</section>""".format(home_image=home_image)
     return shell("home", SITE_TITLE, body)
 
 
@@ -164,13 +182,18 @@ def build_artwork_page(pages):
         page = pages.get(slug)
         if not page:
             continue
-        image = first_image(page["content"])
+        image = CARD_COVERS.get(slug, first_image(page["content"]))
         year_match = re.search(r"<p[^>]*>\s*((?:19|20)\d{2}(?:[-–](?:19|20)?\d{2})?)\s*</p>", clean_content(page["content"]))
         year = year_match.group(1) if year_match else ""
-        title = page["title"].replace("\xa0", " ").strip()
-        image_html = f'<img src="../{image}" alt="">' if image else ""
+        title = DISPLAY_TITLES.get(slug, page["title"].replace("\xa0", " ").strip())
+        image_html = f'<img src="../{image}" alt="">' if image else '<span class="text-cover">TIME<br>ENOUGH</span>'
+        card_classes = "art-card"
+        if slug in POSTER_CARDS:
+            card_classes += " is-poster"
+        if not image:
+            card_classes += " is-text-cover"
         cards.append(
-            f"""<a class="art-card" href="../{slug}/index.html">
+            f"""<a class="{card_classes}" href="../{slug}/index.html">
   <span class="art-thumb">{image_html}</span>
   <span class="art-title">{html.escape(title)}</span>
   <span class="art-year">{html.escape(year)}</span>
@@ -188,12 +211,20 @@ def build_standard_page(page):
     content = clean_content(page["content"], prefix)
     content = re.sub(r"^\s*<div class=\"wp-block-columns[^>]*>\s*<div class=\"wp-block-column\">\s*<h1[^>]*>Publications</h1>[\s\S]*?</div>\s*<div class=\"wp-block-column\"></div>\s*</div>", "", content, count=1)
     page_class = f"page page-{page['slug']}"
+    title = DISPLAY_TITLES.get(page["slug"], page["title"].replace("\xa0", " ").strip())
+    content = re.sub(r"To Summer Offline Shop Projects", "To Summer Commercial Project", content)
+    content = re.sub(
+        rf'^\s*<div class="wp-block-group[^"]*">\s*<div class="wp-block-columns[^"]*">\s*<div class="wp-block-column[^"]*">\s*<h2 class="wp-block-heading">{re.escape(title)}</h2>',
+        lambda _m: _m.group(0).replace(f'<h2 class="wp-block-heading">{title}</h2>', ""),
+        content,
+        count=1,
+    )
     body = f"""<article class="page">
-  <h1>{html.escape(page["title"])}</h1>
+  <h1>{html.escape(title)}</h1>
   <div class="wp-content">{content}</div>
 </article>"""
     body = body.replace('class="page"', f'class="{page_class}"', 1)
-    return shell(page["slug"], page["title"], body, excerpt(page["content"]))
+    return shell(page["slug"], title, body, excerpt(page["content"]))
 
 
 def main():

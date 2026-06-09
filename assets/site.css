@@ -82,19 +82,19 @@ main {
 .home-clean {
   align-items: center;
   display: grid;
-  gap: clamp(34px, 7vw, 96px);
-  grid-template-columns: minmax(280px, 0.86fr) minmax(280px, 1fr);
-  margin: 0 auto;
-  max-width: 1120px;
+  gap: clamp(28px, 5vw, 70px);
+  grid-template-columns: minmax(360px, 1.25fr) minmax(260px, 0.75fr);
+  margin: 0;
+  max-width: none;
   min-height: calc(100vh - 142px);
-  padding: clamp(34px, 6vw, 78px) clamp(20px, 5vw, 64px);
+  padding: clamp(22px, 4vw, 52px) clamp(20px, 5vw, 64px);
 }
 
 .home-image img {
   margin: 0 auto;
-  max-height: 68vh;
+  max-height: 74vh;
   object-fit: contain;
-  width: min(100%, 520px);
+  width: min(100%, 880px);
 }
 
 .home-name h1 {
@@ -313,7 +313,7 @@ h1 {
 }
 
 .art-thumb {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 4;
   background: #eee;
   display: block;
   overflow: hidden;
@@ -324,6 +324,29 @@ h1 {
   object-fit: cover;
   transition: transform 240ms ease;
   width: 100%;
+}
+
+.art-card.is-poster .art-thumb {
+  background: #f3f1eb;
+}
+
+.art-card.is-poster .art-thumb img {
+  object-fit: contain;
+}
+
+.art-card.is-text-cover .art-thumb {
+  align-items: center;
+  background: #171717;
+  color: #f7f4ea;
+  display: flex;
+  justify-content: center;
+}
+
+.text-cover {
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 600;
+  line-height: 0.95;
+  text-align: center;
 }
 
 .art-card:hover img {
@@ -356,7 +379,7 @@ h1 {
 }
 
 .page-experiences .wp-block-columns > .wp-block-column:first-child h2 {
-  color: var(--accent);
+  color: var(--ink);
   font-size: clamp(20px, 2.4vw, 30px);
   margin: 0;
 }
@@ -369,7 +392,7 @@ h1 {
   border-bottom: 1px solid rgb(0 0 0 / 0.08);
   display: grid;
   gap: 8px 20px;
-  grid-template-columns: minmax(100px, 150px) minmax(0, 1fr);
+  grid-template-columns: minmax(112px, 150px) minmax(0, 1fr);
   padding: 0 0 20px;
   margin-bottom: 20px;
 }
@@ -395,6 +418,17 @@ h1 {
 .page-experiences .wp-block-column:last-child p {
   margin: 0;
   max-width: 820px;
+}
+
+.page-experiences .has-text-align-center,
+.page-experiences .has-text-align-left {
+  text-align: left;
+}
+
+.media-link {
+  background: #f3f1eb;
+  border: 1px solid var(--line);
+  padding: 14px 16px;
 }
 
 @media (max-width: 760px) {
