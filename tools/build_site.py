@@ -113,25 +113,42 @@ def video_embed(url):
     if "youtube.com" in host:
         video_id = parse_qs(parsed.query).get("v", [""])[0]
         if video_id:
-            return video_iframe(f"https://www.youtube.com/embed/{html.escape(video_id)}", "Embedded YouTube video")
+            return video_iframe(
+                f"https://www.youtube-nocookie.com/embed/{html.escape(video_id)}",
+                "Embedded YouTube video",
+                clean_url,
+                "Watch on YouTube",
+            )
     if "youtu.be" in host:
         video_id = parsed.path.strip("/").split("/")[0]
         if video_id:
-            return video_iframe(f"https://www.youtube.com/embed/{html.escape(video_id)}", "Embedded YouTube video")
+            return video_iframe(
+                f"https://www.youtube-nocookie.com/embed/{html.escape(video_id)}",
+                "Embedded YouTube video",
+                clean_url,
+                "Watch on YouTube",
+            )
     if "vimeo.com" in host:
         match = re.search(r"/(\d+)", parsed.path)
         if match:
-            return video_iframe(f"https://player.vimeo.com/video/{html.escape(match.group(1))}", "Embedded Vimeo video")
+            return video_iframe(
+                f"https://player.vimeo.com/video/{html.escape(match.group(1))}",
+                "Embedded Vimeo video",
+                clean_url,
+                "Watch on Vimeo",
+            )
     escaped = html.escape(clean_url)
     return f'<p class="media-link"><a href="{escaped}">{escaped}</a></p>'
 
 
-def video_iframe(src, title):
+def video_iframe(src, title, fallback_url, fallback_text):
+    fallback = html.escape(fallback_url)
     return (
         '<div class="video-embed">'
         f'<iframe src="{src}" title="{title}" loading="lazy" '
         'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" '
         "allowfullscreen></iframe></div>"
+        f'<p class="video-fallback"><a href="{fallback}">{html.escape(fallback_text)}</a></p>'
     )
 
 

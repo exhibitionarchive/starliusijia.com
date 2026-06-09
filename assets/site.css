@@ -445,6 +445,15 @@ h1 {
   width: 100%;
 }
 
+.video-fallback {
+  font-size: 14px;
+  margin: 8px 0 22px;
+}
+
+.video-fallback a {
+  color: var(--muted);
+}
+
 .project-photo-grid {
   display: grid;
   gap: 16px;
