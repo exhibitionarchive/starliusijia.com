@@ -113,21 +113,11 @@ def video_embed(url):
     if "youtube.com" in host:
         video_id = parse_qs(parsed.query).get("v", [""])[0]
         if video_id:
-            return video_iframe(
-                f"https://www.youtube-nocookie.com/embed/{html.escape(video_id)}",
-                "Embedded YouTube video",
-                clean_url,
-                "Watch on YouTube",
-            )
+            return youtube_card(video_id, clean_url)
     if "youtu.be" in host:
         video_id = parsed.path.strip("/").split("/")[0]
         if video_id:
-            return video_iframe(
-                f"https://www.youtube-nocookie.com/embed/{html.escape(video_id)}",
-                "Embedded YouTube video",
-                clean_url,
-                "Watch on YouTube",
-            )
+            return youtube_card(video_id, clean_url)
     if "vimeo.com" in host:
         match = re.search(r"/(\d+)", parsed.path)
         if match:
@@ -149,6 +139,16 @@ def video_iframe(src, title, fallback_url, fallback_text):
         'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" '
         "allowfullscreen></iframe></div>"
         f'<p class="video-fallback"><a href="{fallback}">{html.escape(fallback_text)}</a></p>'
+    )
+
+
+def youtube_card(video_id, url):
+    escaped_url = html.escape(url)
+    return (
+        f'<a class="youtube-card" href="{escaped_url}">'
+        '<span class="youtube-mark">YouTube</span>'
+        '<span class="youtube-play">Watch on YouTube</span>'
+        "</a>"
     )
 
 
@@ -254,7 +254,13 @@ def build_artwork_page(pages):
         year_match = re.search(r"<p[^>]*>\s*((?:19|20)\d{2}(?:[-–](?:19|20)?\d{2})?)\s*</p>", clean_content(page["content"]))
         year = year_match.group(1) if year_match else ""
         title = DISPLAY_TITLES.get(slug, page["title"].replace("\xa0", " ").strip())
-        image_html = f'<img src="../{image}" alt="">' if image else '<span class="text-cover">TIME<br>ENOUGH</span>'
+        if image and re.match(r"https?://", image):
+            image_src = image
+        elif image:
+            image_src = f"../{image}"
+        else:
+            image_src = ""
+        image_html = f'<img src="{image_src}" alt="">' if image_src else '<span class="text-cover">TIME<br>ENOUGH</span>'
         card_classes = "art-card"
         if slug in POSTER_CARDS:
             card_classes += " is-poster"
