@@ -53,6 +53,13 @@ POSTER_CARDS = {
     "dreamscapes",
     "future-tense",
 }
+VENUE_DETAILS = {
+    "speculative-visions-of-a-post-climate-future": (
+        "Korean Cultural Center in Hong Kong, Central, Hong Kong"
+    ),
+    "dreamscapes": "Pao Galleries, Hong Kong Arts Centre, Wan Chai, Hong Kong",
+    "future-tense": "Pao Galleries, Hong Kong Arts Centre, Wan Chai, Hong Kong",
+}
 
 
 def text(node, query, default=""):
@@ -101,7 +108,7 @@ def clean_content(markup, prefix=""):
 
 
 def excerpt(markup, limit=170):
-    plain = re.sub(r"<[^>]+>", " ", clean_content(markup))
+    plain = re.sub(r"<[^>]+>", " ", normalize_dates(clean_content(markup)))
     plain = html.unescape(re.sub(r"\s+", " ", plain)).strip()
     return plain[:limit].rsplit(" ", 1)[0] + ("..." if len(plain) > limit else "")
 
@@ -115,8 +122,9 @@ def video_embed(url):
     if "youtube.com" in host:
         video_id = parse_qs(parsed.query).get("v", [""])[0]
         if video_id:
+            embed_host = "www.youtube.com" if video_id == "qMnxyR7JGao" else "www.youtube-nocookie.com"
             return video_iframe(
-                f"https://www.youtube-nocookie.com/embed/{html.escape(video_id)}",
+                f"https://{embed_host}/embed/{html.escape(video_id)}",
                 "Embedded YouTube video",
                 clean_url,
                 "Watch on YouTube",
@@ -124,8 +132,9 @@ def video_embed(url):
     if "youtu.be" in host:
         video_id = parsed.path.strip("/").split("/")[0]
         if video_id:
+            embed_host = "www.youtube.com" if video_id == "qMnxyR7JGao" else "www.youtube-nocookie.com"
             return video_iframe(
-                f"https://www.youtube-nocookie.com/embed/{html.escape(video_id)}",
+                f"https://{embed_host}/embed/{html.escape(video_id)}",
                 "Embedded YouTube video",
                 clean_url,
                 "Watch on YouTube",
@@ -294,14 +303,25 @@ def build_standard_page(page):
     page_class = f"page page-{page['slug']}"
     title = DISPLAY_TITLES.get(page["slug"], page["title"].replace("\xa0", " ").strip())
     content = re.sub(r"To Summer Offline Shop Projects", "To Summer Commercial Project", content)
+    content = normalize_dates(content)
+    if page["slug"] in VENUE_DETAILS:
+        content = add_venue_detail(content, VENUE_DETAILS[page["slug"]])
     if page["slug"] == "time-enough":
         images = (
-            '<div class="project-photo-grid">'
+            '<div class="project-photo-grid is-large">'
             '<figure><img src="../assets/time-enough-installation-1.png" alt="TIME ENOUGH installation view with projected climate future video and sculptural tubes"></figure>'
             '<figure><img src="../assets/time-enough-installation-2.png" alt="TIME ENOUGH exhibition view with two video screens and installation objects"></figure>'
             "</div>"
         )
-        content = content.replace('<div class="video-embed">', images + '<div class="video-embed">', 1)
+        content = content.replace('</p><div class="project-photo-grid is-large">', '</p>', 1)
+        content = re.sub(
+            r'(<p class="video-fallback">[\s\S]*?</p>)',
+            lambda match: match.group(1) + images,
+            content,
+            count=1,
+        )
+    if page["slug"] in {"dreamscaping", "future-tense"}:
+        content = move_video_under_first_image(content)
     content = re.sub(
         rf'^\s*<div class="wp-block-group[^"]*">\s*<div class="wp-block-columns[^"]*">\s*<div class="wp-block-column[^"]*">\s*<h2 class="wp-block-heading">{re.escape(title)}</h2>',
         lambda _m: _m.group(0).replace(f'<h2 class="wp-block-heading">{title}</h2>', ""),
@@ -314,6 +334,34 @@ def build_standard_page(page):
 </article>"""
     body = body.replace('class="page"', f'class="{page_class}"', 1)
     return shell(page["slug"], title, body, excerpt(page["content"]))
+
+
+def normalize_dates(content):
+    content = content.replace("<strong>2026/0</strong>6", "<strong>2026/06</strong>")
+    content = re.sub(r"\b(20\d{2})-\1\b", r"\1", content)
+    content = re.sub(r"\b([A-Z][a-z]{2}) (20\d{2})-\1 \2\b", r"\1 \2", content)
+    content = re.sub(r"\b(20\d{2}) ([A-Z][a-z]+) to \1 \2\b", r"\1 \2", content)
+    content = re.sub(r"\b([A-Z][a-z]+) (20\d{2}) to \1 \2\b", r"\1 \2", content)
+    return content
+
+
+def add_venue_detail(content, venue):
+    pattern = r'(<p class="has-small-font-size"><strong>[^<]+</strong>(?:, <strong>[^<]+</strong>)?</p>)'
+    if venue in content:
+        return content
+    venue_html = f'<p class="has-small-font-size">{html.escape(venue)}</p>'
+    return re.sub(pattern, lambda match: match.group(1) + "\n\n" + venue_html, content, count=1)
+
+
+def move_video_under_first_image(content):
+    video_match = re.search(r'<div class="video-embed">[\s\S]*?<p class="video-fallback">[\s\S]*?</p>', content)
+    image_match = re.search(r'(<figure class="wp-block-image[^>]*><img [\s\S]*?</figure>)', content)
+    if not video_match or not image_match or video_match.start() > image_match.end():
+        return content
+    video = video_match.group(0)
+    content = content[: video_match.start()] + content[video_match.end() :]
+    image_match = re.search(r'(<figure class="wp-block-image[^>]*><img [\s\S]*?</figure>)', content)
+    return content[: image_match.end()] + video + content[image_match.end() :]
 
 
 def main():

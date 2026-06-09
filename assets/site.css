@@ -425,6 +425,16 @@ h1 {
   text-align: left;
 }
 
+.page-dreamscaping .video-embed,
+.page-future-tense .video-embed {
+  max-width: 560px;
+}
+
+.page-dreamscaping .video-fallback,
+.page-future-tense .video-fallback {
+  max-width: 560px;
+}
+
 .media-link {
   background: #f3f1eb;
   border: 1px solid var(--line);
@@ -460,6 +470,11 @@ h1 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 24px 0;
   max-width: 1100px;
+}
+
+.project-photo-grid.is-large {
+  grid-template-columns: 1fr;
+  max-width: 1180px;
 }
 
 .project-photo-grid figure {
