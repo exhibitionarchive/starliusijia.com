@@ -45,7 +45,7 @@ DISPLAY_TITLES = {
     "to-summer": "To Summer Commercial Project",
 }
 CARD_COVERS = {
-    "time-enough": None,
+    "time-enough": "assets/time-enough-installation-1.png",
     "look-deep-into-your-dream": "2024/04/2-7.jpg",
 }
 POSTER_CARDS = {
@@ -243,6 +243,14 @@ def build_standard_page(page):
     page_class = f"page page-{page['slug']}"
     title = DISPLAY_TITLES.get(page["slug"], page["title"].replace("\xa0", " ").strip())
     content = re.sub(r"To Summer Offline Shop Projects", "To Summer Commercial Project", content)
+    if page["slug"] == "time-enough":
+        images = (
+            '<div class="project-photo-grid">'
+            '<figure><img src="../assets/time-enough-installation-1.png" alt="TIME ENOUGH installation view with projected climate future video and sculptural tubes"></figure>'
+            '<figure><img src="../assets/time-enough-installation-2.png" alt="TIME ENOUGH exhibition view with two video screens and installation objects"></figure>'
+            "</div>"
+        )
+        content = content.replace('<div class="video-embed">', images + '<div class="video-embed">', 1)
     content = re.sub(
         rf'^\s*<div class="wp-block-group[^"]*">\s*<div class="wp-block-columns[^"]*">\s*<div class="wp-block-column[^"]*">\s*<h2 class="wp-block-heading">{re.escape(title)}</h2>',
         lambda _m: _m.group(0).replace(f'<h2 class="wp-block-heading">{title}</h2>', ""),
