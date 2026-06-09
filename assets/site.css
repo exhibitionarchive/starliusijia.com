@@ -431,6 +431,20 @@ h1 {
   padding: 14px 16px;
 }
 
+.video-embed {
+  aspect-ratio: 16 / 9;
+  background: #111;
+  margin: 18px 0;
+  max-width: 900px;
+  overflow: hidden;
+}
+
+.video-embed iframe {
+  border: 0;
+  height: 100%;
+  width: 100%;
+}
+
 @media (max-width: 760px) {
   .site-header {
     align-items: flex-start;

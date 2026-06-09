@@ -3,6 +3,7 @@ import html
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPORT = ROOT / "liusijiastar.WordPress.2026-06-09.xml"
@@ -91,7 +92,7 @@ def clean_content(markup, prefix=""):
     markup = re.sub(r"\sstyle=\"[^\"]*\"", "", markup)
     markup = re.sub(
         r"<figure class=\"wp-block-embed[\s\S]*?<div class=\"wp-block-embed__wrapper\">\s*(https?://[^\s<]+)\s*</div></figure>",
-        r'<p class="media-link"><a href="\1">\1</a></p>',
+        lambda match: video_embed(match.group(1)),
         markup,
     )
     markup = re.sub(r"<div class=\"wp-block-group alignfull\"[^>]*>\s*</div>", "", markup)
@@ -102,6 +103,35 @@ def excerpt(markup, limit=170):
     plain = re.sub(r"<[^>]+>", " ", clean_content(markup))
     plain = html.unescape(re.sub(r"\s+", " ", plain)).strip()
     return plain[:limit].rsplit(" ", 1)[0] + ("..." if len(plain) > limit else "")
+
+
+def video_embed(url):
+    clean_url = html.unescape(url)
+    parsed = urlparse(clean_url)
+    host = parsed.netloc.lower()
+    if "youtube.com" in host:
+        video_id = parse_qs(parsed.query).get("v", [""])[0]
+        if video_id:
+            return video_iframe(f"https://www.youtube.com/embed/{html.escape(video_id)}", "Embedded YouTube video")
+    if "youtu.be" in host:
+        video_id = parsed.path.strip("/").split("/")[0]
+        if video_id:
+            return video_iframe(f"https://www.youtube.com/embed/{html.escape(video_id)}", "Embedded YouTube video")
+    if "vimeo.com" in host:
+        match = re.search(r"/(\d+)", parsed.path)
+        if match:
+            return video_iframe(f"https://player.vimeo.com/video/{html.escape(match.group(1))}", "Embedded Vimeo video")
+    escaped = html.escape(clean_url)
+    return f'<p class="media-link"><a href="{escaped}">{escaped}</a></p>'
+
+
+def video_iframe(src, title):
+    return (
+        '<div class="video-embed">'
+        f'<iframe src="{src}" title="{title}" loading="lazy" '
+        'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" '
+        "allowfullscreen></iframe></div>"
+    )
 
 
 def first_image(markup):
