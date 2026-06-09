@@ -13,20 +13,32 @@ NS = {
 }
 
 PRIMARY = ["about", "publication", "artwork", "experiences"]
+SLUG_ALIASES = {"__trashed-6": "to-summer"}
+PAGE_ID_TO_SLUG = {
+    "204": "to-summer",
+    "253": "diving-into-the-unknown",
+    "275": "in-active",
+    "283": "fortune-telling",
+    "303": "what-kind-of-world-flows-from-beehive",
+    "312": "where-shall-we-meet-tonight",
+    "323": "look-deep-into-your-dream",
+    "330": "secret-recycling",
+}
 PROJECTS = [
-    "nonhumotion",
-    "dreamscapes",
     "speculative-visions-of-a-post-climate-future",
+    "dreamscapes",
+    "nonhumotion",
     "future-tense",
     "dreamscaping",
     "time-enough",
+    "diving-into-the-unknown",
+    "to-summer",
+    "in-active",
     "secret-recycling",
-    "look-deep-into-your-dream",
     "where-shall-we-meet-tonight",
     "what-kind-of-world-flows-from-beehive",
     "fortune-telling",
-    "in-active",
-    "diving-into-the-unknown",
+    "look-deep-into-your-dream",
 ]
 
 
@@ -42,6 +54,7 @@ def load_pages():
         if text(item, "wp:post_type") != "page" or text(item, "wp:status") != "publish":
             continue
         slug = text(item, "wp:post_name").strip()
+        slug = SLUG_ALIASES.get(slug, slug)
         title = (item.findtext("title") or slug).strip()
         content = text(item, "content:encoded")
         pages.append({"slug": slug, "title": title, "content": content})
@@ -52,14 +65,18 @@ def clean_content(markup, prefix=""):
     markup = markup.replace("u002d", "-")
     markup = re.sub(r"<!--\s*/?wp:[\s\S]*?-->", "", markup)
     markup = re.sub(r"<header[\s\S]*?</header>", "", markup, count=1)
+    markup = re.sub(r"<div[^>]+class=\"wp-block-spacer\"[^>]*></div>", "", markup)
     markup = re.sub(r"<p[^>]*>\s*<a href=\"https://www.instagram.com/starliusijia/\"[\s\S]*?</p>", "", markup)
     markup = re.sub(r"<div class=\"wp-block-group alignfull\"[^>]*>\s*<div class=\"wp-block-group\"[^>]*>\s*<div class=\"wp-block-group\"></div>\s*</div>\s*</div>", "", markup)
     markup = re.sub(r"https://starliusijiacom\.wordpress\.com/wp-content/uploads/", "", markup)
     markup = re.sub(r"https://starliusijia\.com/wp-content/uploads/", "", markup)
+    markup = re.sub(r'https://starliusijia\.com/([^"/?#]+)/?', lambda m: f'{prefix}{m.group(1)}/index.html', markup)
+    markup = re.sub(r'https://starliusijiacom\.wordpress\.com/\?page_id=(\d+)', lambda m: f'{prefix}{PAGE_ID_TO_SLUG.get(m.group(1), "artwork")}/index.html', markup)
     markup = re.sub(r"((?:src|href)=\"[^\"]+?)\?w=\d+", r"\1", markup)
     if prefix:
         markup = re.sub(r'((?:src|href)=")(20\d{2}/)', rf"\1{prefix}\2", markup)
     markup = re.sub(r"\s(?:width|height|sizes|srcset)=\"[^\"]*\"", "", markup)
+    markup = re.sub(r"\sstyle=\"[^\"]*\"", "", markup)
     markup = re.sub(r"<div class=\"wp-block-group alignfull\"[^>]*>\s*</div>", "", markup)
     return markup.strip()
 
@@ -129,35 +146,53 @@ def write_page(slug, content):
 
 
 def build_home(pages):
+    body = """<section class="home-clean">
+  <div class="home-image">
+    <img src="2024/04/star-edited.jpg" alt="Portrait illustration of Liu Sijia Star">
+  </div>
+  <div class="home-name">
+    <h1><span>LIU</span><span>Sijia Star</span></h1>
+    <p>Art, Design, Curation, Research</p>
+  </div>
+</section>"""
+    return shell("home", SITE_TITLE, body)
+
+
+def build_artwork_page(pages):
     cards = []
     for slug in PROJECTS:
         page = pages.get(slug)
         if not page:
             continue
         image = first_image(page["content"])
-        image_html = f'<img src="{image}" alt="">' if image else ""
+        year_match = re.search(r"<p[^>]*>\s*((?:19|20)\d{2}(?:[-–](?:19|20)?\d{2})?)\s*</p>", clean_content(page["content"]))
+        year = year_match.group(1) if year_match else ""
+        title = page["title"].replace("\xa0", " ").strip()
+        image_html = f'<img src="../{image}" alt="">' if image else ""
         cards.append(
-            f"""<a class="project-card" href="{slug}/index.html">
-  {image_html}
-  <span>{html.escape(page["title"])}</span>
+            f"""<a class="art-card" href="../{slug}/index.html">
+  <span class="art-thumb">{image_html}</span>
+  <span class="art-title">{html.escape(title)}</span>
+  <span class="art-year">{html.escape(year)}</span>
 </a>"""
         )
-    body = f"""<section class="home-hero">
-  <p>Artist, researcher, and experience designer</p>
-  <h1>{SITE_TITLE}</h1>
-</section>
-<section class="project-grid" aria-label="Selected projects">
-  {''.join(cards)}
+    body = f"""<section class="artwork-page">
+  <h1>Art</h1>
+  <div class="art-grid">{''.join(cards)}</div>
 </section>"""
-    return shell("home", SITE_TITLE, body)
+    return shell("artwork", "Art", body, "Selected artwork and curatorial projects.")
 
 
 def build_standard_page(page):
     prefix = rel_prefix(page["slug"])
+    content = clean_content(page["content"], prefix)
+    content = re.sub(r"^\s*<div class=\"wp-block-columns[^>]*>\s*<div class=\"wp-block-column\">\s*<h1[^>]*>Publications</h1>[\s\S]*?</div>\s*<div class=\"wp-block-column\"></div>\s*</div>", "", content, count=1)
+    page_class = f"page page-{page['slug']}"
     body = f"""<article class="page">
   <h1>{html.escape(page["title"])}</h1>
-  <div class="wp-content">{clean_content(page["content"], prefix)}</div>
+  <div class="wp-content">{content}</div>
 </article>"""
+    body = body.replace('class="page"', f'class="{page_class}"', 1)
     return shell(page["slug"], page["title"], body, excerpt(page["content"]))
 
 
@@ -166,7 +201,8 @@ def main():
     (ROOT / "assets").mkdir(exist_ok=True)
     write_page("home", build_home(pages))
     for slug, page in pages.items():
-        if slug.startswith("__trashed"):
+        if slug == "artwork":
+            write_page(slug, build_artwork_page(pages))
             continue
         write_page(slug, build_standard_page(page))
 
