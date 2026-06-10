@@ -90,6 +90,10 @@ def clean_content(markup, prefix=""):
     markup = re.sub(r"<div class=\"wp-block-group alignfull\"[^>]*>\s*<div class=\"wp-block-group\"[^>]*>\s*<div class=\"wp-block-group\"></div>\s*</div>\s*</div>", "", markup)
     markup = re.sub(r"https://starliusijiacom\.wordpress\.com/wp-content/uploads/", "", markup)
     markup = re.sub(r"https://starliusijia\.com/wp-content/uploads/", "", markup)
+    markup = markup.replace(
+        "2025/04/083e650eb4741b89e5d837f463b6a8ca.png",
+        "2025/04/083e650eb4741b89e5d837f463b6a8ca%20copy.jpg",
+    )
     markup = re.sub(r'https://starliusijia\.com/([^"/?#]+)/?', lambda m: f'{prefix}{m.group(1)}/index.html', markup)
     markup = re.sub(r'https://starliusijiacom\.wordpress\.com/\?page_id=(\d+)', lambda m: f'{prefix}{PAGE_ID_TO_SLUG.get(m.group(1), "artwork")}/index.html', markup)
     markup = re.sub(r"((?:src|href)=\"[^\"]+?)\?w=\d+", r"\1", markup)
