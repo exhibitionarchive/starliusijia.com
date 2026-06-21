@@ -14,6 +14,7 @@ NS = {
 }
 
 PRIMARY = ["about", "publication", "artwork", "experiences"]
+NAV_LABELS = {"artwork": "Art"}
 SLUG_ALIASES = {"__trashed-6": "to-summer"}
 PAGE_ID_TO_SLUG = {
     "204": "to-summer",
@@ -217,7 +218,7 @@ def rel_prefix(slug):
 def nav(slug):
     prefix = rel_prefix(slug)
     links = [("Home", prefix + "index.html")]
-    links += [(label.title(), prefix + f"{label}/index.html") for label in PRIMARY]
+    links += [(NAV_LABELS.get(label, label.title()), prefix + f"{label}/index.html") for label in PRIMARY]
     return "".join(f'<a href="{url}">{label}</a>' for label, url in links)
 
 
