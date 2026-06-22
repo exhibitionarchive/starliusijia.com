@@ -102,7 +102,7 @@ def clean_content(markup, prefix=""):
     )
     markup = markup.replace(
         "https://isea-archives.siggraph.org/wp-content/uploads/2025/01/2024_Liu_Falling_Echoes_Expressing_the_Act_of_Falling.pdf",
-        "https://www.isea-symposium-archives.org/wp-content/uploads/2026/05/ISEA2024_Proceedings_Rev2.0May2026.pdf",
+        "https://scholars.cityu.edu.hk/ws/portalfiles/portal/282181702/194210495.pdf",
     )
     markup = re.sub(
         r'https://starliusijia\.com/([^"/?#]+)/?',
@@ -386,8 +386,8 @@ def normalize_dates(content):
 
 def separate_publication_entries(content):
     content = content.replace(
-        '</div>\n\n\n\n<div class="wp-block-group">\n<div class="wp-block-group">\n<p class="has-small-font-size"><strong><a href="https://www.isea-symposium-archives.org/wp-content/uploads/2026/05/ISEA2024_Proceedings_Rev2.0May2026.pdf">Falling Echoes',
-        '</div>\n</div>\n\n\n\n<div class="wp-block-group">\n<div class="wp-block-group">\n<p class="has-small-font-size"><strong><a href="https://www.isea-symposium-archives.org/wp-content/uploads/2026/05/ISEA2024_Proceedings_Rev2.0May2026.pdf">Falling Echoes',
+        '</div>\n\n\n\n<div class="wp-block-group">\n<div class="wp-block-group">\n<p class="has-small-font-size"><strong><a href="https://scholars.cityu.edu.hk/ws/portalfiles/portal/282181702/194210495.pdf">Falling Echoes',
+        '</div>\n</div>\n\n\n\n<div class="wp-block-group">\n<div class="wp-block-group">\n<p class="has-small-font-size"><strong><a href="https://scholars.cityu.edu.hk/ws/portalfiles/portal/282181702/194210495.pdf">Falling Echoes',
         1,
     )
     return content.replace(
