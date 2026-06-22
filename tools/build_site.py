@@ -15,6 +15,7 @@ NS = {
 
 PRIMARY = ["about", "publication", "artwork", "experiences"]
 NAV_LABELS = {"artwork": "Art"}
+NAV_SLUGS = {"artwork": "art"}
 SLUG_ALIASES = {"__trashed-6": "to-summer"}
 PAGE_ID_TO_SLUG = {
     "204": "to-summer",
@@ -218,7 +219,10 @@ def rel_prefix(slug):
 def nav(slug):
     prefix = rel_prefix(slug)
     links = [("Home", prefix + "index.html")]
-    links += [(NAV_LABELS.get(label, label.title()), prefix + f"{label}/index.html") for label in PRIMARY]
+    links += [
+        (NAV_LABELS.get(label, label.title()), prefix + f"{NAV_SLUGS.get(label, label)}/index.html")
+        for label in PRIMARY
+    ]
     return "".join(f'<a href="{url}">{label}</a>' for label, url in links)
 
 
@@ -279,7 +283,7 @@ def build_home(pages):
     return shell("home", SITE_TITLE, body)
 
 
-def build_artwork_page(pages):
+def build_artwork_page(pages, slug="art"):
     cards = []
     for slug in PROJECTS:
         page = pages.get(slug)
@@ -312,7 +316,24 @@ def build_artwork_page(pages):
   <h1>Art</h1>
   <div class="art-grid">{''.join(cards)}</div>
 </section>"""
-    return shell("artwork", "Art", body, "Selected artwork and curatorial projects.")
+    return shell(slug, "Art", body, "Selected artwork and curatorial projects.")
+
+
+def build_redirect_page(target="../art/index.html"):
+    return """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="0; url=%s">
+  <title>Redirecting | LIU SIJIA STAR</title>
+  <link rel="canonical" href="%s">
+</head>
+<body>
+  <p><a href="%s">Continue to Art</a></p>
+</body>
+</html>
+""" % (html.escape(target), html.escape(target), html.escape(target))
 
 
 def build_standard_page(page):
@@ -422,7 +443,8 @@ def main():
     write_page("home", build_home(pages))
     for slug, page in pages.items():
         if slug == "artwork":
-            write_page(slug, build_artwork_page(pages))
+            write_page("art", build_artwork_page(pages, "art"))
+            write_page("artwork", build_redirect_page())
             continue
         write_page(slug, build_standard_page(page))
 
