@@ -13,8 +13,8 @@ NS = {
     "content": "http://purl.org/rss/1.0/modules/content/",
 }
 
-PRIMARY = ["about", "publication", "artwork", "experiences"]
-NAV_LABELS = {"artwork": "Art"}
+PRIMARY = ["about", "publication", "art", "experiences"]
+NAV_LABELS = {"art": "Art"}
 NAV_SLUGS = {"artwork": "art"}
 SLUG_ALIASES = {"__trashed-6": "to-summer"}
 PAGE_ID_TO_SLUG = {
@@ -100,8 +100,16 @@ def clean_content(markup, prefix=""):
         "https://doi.org/10.48550/arXiv.2604.25657",
         "https://doi.org/10.1145/3800645.3812941",
     )
-    markup = re.sub(r'https://starliusijia\.com/([^"/?#]+)/?', lambda m: f'{prefix}{m.group(1)}/index.html', markup)
-    markup = re.sub(r'https://starliusijiacom\.wordpress\.com/\?page_id=(\d+)', lambda m: f'{prefix}{PAGE_ID_TO_SLUG.get(m.group(1), "artwork")}/index.html', markup)
+    markup = re.sub(
+        r'https://starliusijia\.com/([^"/?#]+)/?',
+        lambda m: f'{prefix}{NAV_SLUGS.get(m.group(1), m.group(1))}/index.html',
+        markup,
+    )
+    markup = re.sub(
+        r'https://starliusijiacom\.wordpress\.com/\?page_id=(\d+)',
+        lambda m: f'{prefix}{NAV_SLUGS.get(PAGE_ID_TO_SLUG.get(m.group(1), "artwork"), PAGE_ID_TO_SLUG.get(m.group(1), "artwork"))}/index.html',
+        markup,
+    )
     markup = re.sub(r"((?:src|href)=\"[^\"]+?)\?w=\d+", r"\1", markup)
     if prefix:
         markup = re.sub(r'((?:src|href)=")(20\d{2}/)', rf"\1{prefix}\2", markup)
@@ -319,23 +327,6 @@ def build_artwork_page(pages, slug="art"):
     return shell(slug, "Art", body, "Selected artwork and curatorial projects.")
 
 
-def build_redirect_page(target="../art/index.html"):
-    return """<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0; url=%s">
-  <title>Redirecting | LIU SIJIA STAR</title>
-  <link rel="canonical" href="%s">
-</head>
-<body>
-  <p><a href="%s">Continue to Art</a></p>
-</body>
-</html>
-""" % (html.escape(target), html.escape(target), html.escape(target))
-
-
 def build_standard_page(page):
     prefix = rel_prefix(page["slug"])
     content = clean_content(page["content"], prefix)
@@ -444,7 +435,6 @@ def main():
     for slug, page in pages.items():
         if slug == "artwork":
             write_page("art", build_artwork_page(pages, "art"))
-            write_page("artwork", build_redirect_page())
             continue
         write_page(slug, build_standard_page(page))
 
