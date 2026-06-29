@@ -47,13 +47,20 @@ DISPLAY_TITLES = {
     "to-summer": "To Summer Commercial Project",
 }
 CARD_COVERS = {
+    "speculative-visions-of-a-post-climate-future": "2026/06/nonhumototion-2.0-performance.jpg",
+    "dreamscapes": "2026/03/image-5.png",
+    "nonhumotion": "2025/03/2025_nonhumotion_exhibition-03.jpg",
+    "future-tense": "2025/03/2024_futuretense_exhibit-02.jpg",
+    "dreamscaping": "2024/10/r0004904.jpg",
     "time-enough": "assets/time-enough-installation-1.png",
+    "diving-into-the-unknown": "2024/04/screenshot-2023-11-07-at-11.05.28-1.png",
+    "to-summer": "2024/04/img_6359-1.png",
+    "in-active": "2024/04/1-3.jpg",
+    "secret-recycling": "2024/04/5-2.jpg",
+    "where-shall-we-meet-tonight": "2024/04/4-5.jpg",
+    "what-kind-of-world-flows-from-beehive": "2024/04/2-4.jpg",
+    "fortune-telling": "2024/04/1-4.jpg",
     "look-deep-into-your-dream": "2024/04/2-7.jpg",
-}
-POSTER_CARDS = {
-    "speculative-visions-of-a-post-climate-future",
-    "dreamscapes",
-    "future-tense",
 }
 VENUE_DETAILS = {
     "speculative-visions-of-a-post-climate-future": (
@@ -313,8 +320,6 @@ def build_artwork_page(pages, slug="art"):
             image_src = ""
         image_html = f'<img src="{image_src}" alt="">' if image_src else '<span class="text-cover">TIME<br>ENOUGH</span>'
         card_classes = "art-card"
-        if slug in POSTER_CARDS:
-            card_classes += " is-poster"
         if not image:
             card_classes += " is-text-cover"
         cards.append(

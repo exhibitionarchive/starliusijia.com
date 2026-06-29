@@ -330,14 +330,6 @@ h1 {
   width: 100%;
 }
 
-.art-card.is-poster .art-thumb {
-  background: #f3f1eb;
-}
-
-.art-card.is-poster .art-thumb img {
-  object-fit: contain;
-}
-
 .art-card.is-text-cover .art-thumb {
   align-items: center;
   background: #171717;
