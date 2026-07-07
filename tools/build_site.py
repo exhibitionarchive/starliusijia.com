@@ -153,7 +153,7 @@ def video_embed(url):
     if "youtube.com" in host:
         video_id = parse_qs(parsed.query).get("v", [""])[0]
         if video_id:
-            embed_host = "www.youtube.com" if video_id == "qMnxyR7JGao" else "www.youtube-nocookie.com"
+            embed_host = "www.youtube.com" if video_id in {"qMnxyR7JGao", "2WE4oND1LMk"} else "www.youtube-nocookie.com"
             src = f"https://{embed_host}/embed/{html.escape(video_id)}"
             if start_at:
                 src += f"?start={html.escape(start_at)}"
@@ -167,7 +167,7 @@ def video_embed(url):
     if "youtu.be" in host:
         video_id = parsed.path.strip("/").split("/")[0]
         if video_id:
-            embed_host = "www.youtube.com" if video_id == "qMnxyR7JGao" else "www.youtube-nocookie.com"
+            embed_host = "www.youtube.com" if video_id in {"qMnxyR7JGao", "2WE4oND1LMk"} else "www.youtube-nocookie.com"
             src = f"https://{embed_host}/embed/{html.escape(video_id)}"
             if start_at:
                 src += f"?start={html.escape(start_at)}"
