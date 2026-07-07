@@ -353,7 +353,6 @@ def build_standard_page(page):
     if page["slug"] == "speculative-visions-of-a-post-climate-future":
         documentation = (
             '<section class="project-documentation">'
-            '<h2>Documentation</h2>'
             + video_embed("https://www.youtube.com/watch?v=2WE4oND1LMk")
             + "</section>"
         )
