@@ -456,6 +456,16 @@ h1 {
   text-align: center;
 }
 
+.project-documentation {
+  margin: 48px auto;
+  max-width: 900px;
+}
+
+.project-documentation h2,
+.project-documentation .video-fallback {
+  text-align: center;
+}
+
 .media-link {
   background: #f3f1eb;
   border: 1px solid var(--line);

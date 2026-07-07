@@ -350,6 +350,19 @@ def build_standard_page(page):
         content = add_dreamscaping_related_publication(content)
     if page["slug"] in VENUE_DETAILS:
         content = add_venue_detail(content, VENUE_DETAILS[page["slug"]])
+    if page["slug"] == "speculative-visions-of-a-post-climate-future":
+        documentation = (
+            '<section class="project-documentation">'
+            '<h2>Documentation</h2>'
+            + video_embed("https://www.youtube.com/watch?v=2WE4oND1LMk")
+            + "</section>"
+        )
+        gallery_marker = (
+            '<div class="wp-block-group alignfull">\n'
+            '<div class="wp-block-group alignwide">\n'
+            '<figure class="wp-block-image size-large"><img src="../2026/06/inhwa-work.jpg"'
+        )
+        content = content.replace(gallery_marker, documentation + gallery_marker, 1)
     if page["slug"] == "time-enough":
         images = (
             '<div class="project-photo-grid is-large">'
