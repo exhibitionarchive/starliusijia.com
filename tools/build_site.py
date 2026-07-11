@@ -51,7 +51,7 @@ CARD_COVERS = {
     "dreamscapes": "2026/03/image-5.png",
     "nonhumotion": "2025/03/2025_nonhumotion_exhibition-03.jpg",
     "future-tense": "2025/03/2024_futuretense_exhibit-02.jpg",
-    "dreamscaping": "2024/10/r0004904.jpg",
+    "dreamscaping": "2024/10/r0004917.jpg",
     "time-enough": "assets/time-enough-installation-1.png",
     "diving-into-the-unknown": "2024/04/screenshot-2023-11-07-at-11.05.28-1.png",
     "to-summer": "2024/04/img_6359-1.png",
@@ -283,6 +283,23 @@ def write_page(slug, content):
     path.write_text(content, encoding="utf-8")
 
 
+def build_redirect(target):
+    target = html.escape(target, quote=True)
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="0; url={target}">
+  <link rel="canonical" href="{target}">
+  <title>Redirecting</title>
+</head>
+<body>
+  <p><a href="{target}">Continue to Art</a></p>
+</body>
+</html>"""
+
+
 def build_home(pages):
     if (ROOT / "assets" / "home-cat-moon.jpg").exists():
         home_image = "assets/home-cat-moon.jpg"
@@ -453,6 +470,7 @@ def main():
     pages = load_pages()
     (ROOT / "assets").mkdir(exist_ok=True)
     write_page("home", build_home(pages))
+    write_page("artwork", build_redirect("../art/index.html"))
     for slug, page in pages.items():
         if slug == "artwork":
             write_page("art", build_artwork_page(pages, "art"))
